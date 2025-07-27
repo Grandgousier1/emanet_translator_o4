@@ -20,7 +20,7 @@ poetry install --no-dev
 ## Configuration (optionnelle)
 ```bash
 cp .env.example .env
-# ajustez WHISPER_MODEL_SIZE, NLLB_MODEL, etc.
+# ajustez WHISPER_MODEL_SIZE, NLLB_MODEL_SIZE, etc.
 ```
 
 ## Utilisation CLI
@@ -42,7 +42,7 @@ Supprimer ces fichiers pour forcer une régénération.
 
 ## Choix de modèles
 - Whisper : changer `WHISPER_MODEL_SIZE` (`tiny`, `base`, `small`, `medium`, `large-v3`).
-- Traduction : variable `NLLB_MODEL` (p. ex. `facebook/nllb-200-distilled-600M`).
+- Traduction : variable `NLLB_MODEL_SIZE` (`600M` ou `1.3B`).
 
 ## Optimisation
 - GPU : si CUDA dispo, mettre `WHISPER_DEVICE=cuda` et `WHISPER_COMPUTE_TYPE=float16`.
