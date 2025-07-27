@@ -1,6 +1,7 @@
 import pytest
-from src.offline.pipeline_offline import run_offline
 
-@pytest.mark.skip(reason='Network download required for real test')
+pytest.skip("Network download required for real test", allow_module_level=True)
+
+
 def test_pipeline_stub():
     assert True
