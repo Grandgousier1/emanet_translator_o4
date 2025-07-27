@@ -1,8 +1,7 @@
-from pathlib import Path
-from src.offline.transcriber_offline import transcribe
 import pytest
 
-@pytest.mark.skip(reason='Need sample audio to test')
+pytest.skip("Need sample audio to test", allow_module_level=True)
+
+
 def test_transcribe_stub():
     assert True
-
