@@ -21,17 +21,21 @@ def transcribe(audio_path: Path):
     logger.info('transcribe.start', file=str(audio_path))
     segments, info = model.transcribe(str(audio_path), beam_size=5, vad_filter=True)
     collected = []
-    last_end = None
     for seg in segments:
-        # Merge small gaps
-        if collected and seg.start - collected[-1]['end'] < settings.merge_gap_seconds:
-            collected[-1]['text'] += ' ' + seg.text.strip()
+        seg_text = seg.text.strip()
+        # Merge small gaps when the combined text is not too long
+        if (
+            collected
+            and seg.start - collected[-1]['end'] < settings.merge_gap_seconds
+            and len(collected[-1]['text']) + 1 + len(seg_text) <= settings.max_segment_chars
+        ):
+            collected[-1]['text'] += ' ' + seg_text
             collected[-1]['end'] = seg.end
         else:
             collected.append({
                 'start': float(seg.start),
                 'end': float(seg.end),
-                'text': seg.text.strip()
+                'text': seg_text
             })
     logger.info('transcribe.done', segments=len(collected))
     return collected
