@@ -19,7 +19,7 @@ jobs:
       - name: Install deps
         run: poetry install
       - name: Lint
-        run: poetry run flake8 src tests
+        run: poetry run flake8 src test
       - name: Tests
         run: poetry run pytest -q
 
