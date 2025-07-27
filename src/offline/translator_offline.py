@@ -1,7 +1,6 @@
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from ..config import settings
 from ..logger import logger
-import math
 
 _tok = None
 _model = None
@@ -18,6 +17,7 @@ def translate_segments(segments):
     if not segments:
         return []
     tok, mdl = get_translator()
+    tok.src_lang = "tur_Latn"
     out = []
     batch = []
     max_batch_chars = 1200
@@ -25,7 +25,11 @@ def translate_segments(segments):
         if not batch: return
         texts = [s['text'] for s in batch]
         inputs = tok(texts, return_tensors='pt', padding=True, truncation=True)
-        gen = mdl.generate(**inputs, max_length=512)
+        gen = mdl.generate(
+            **inputs,
+            max_length=512,
+            forced_bos_token_id=tok.lang_code_to_id.get("fra_Latn"),
+        )
         decoded = tok.batch_decode(gen, skip_special_tokens=True)
         for src, tgt in zip(batch, decoded):
             out.append({**src, 'text_fr': tgt})
