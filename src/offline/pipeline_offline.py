@@ -12,25 +12,41 @@ from ..config import settings
 from ..logger import logger
 
 
-def run_offline(url: str) -> Path:
+def run_offline(url: str, *, force: bool = False) -> Path:
+    """Run the offline pipeline for a single YouTube URL.
+
+    Parameters
+    ----------
+    url: str
+        Youtube URL to process.
+    force: bool, default ``False``
+        When ``True`` the transcription and translation caches are
+        completely bypassed (neither read nor written).
+    """
     audio = download_audio(url)
     norm = normalize(audio)
-    # transcription cache
+
     t_cache = transcription_cache_path(norm)
-    segments = load_json(t_cache)
-    if segments is None:
+    if force:
         segments = transcribe(norm)
-        save_json(t_cache, segments)
     else:
-        logger.info('cache.hit.transcription', file=str(norm))
-    # translation cache
+        segments = load_json(t_cache)
+        if segments is None:
+            segments = transcribe(norm)
+            save_json(t_cache, segments)
+        else:
+            logger.info('cache.hit.transcription', file=str(norm))
+
     tr_cache = translation_cache_path(norm)
-    translated = load_json(tr_cache)
-    if translated is None:
+    if force:
         translated = translate_segments(segments)
-        save_json(tr_cache, translated)
     else:
-        logger.info('cache.hit.translation', file=str(norm))
+        translated = load_json(tr_cache)
+        if translated is None:
+            translated = translate_segments(segments)
+            save_json(tr_cache, translated)
+        else:
+            logger.info('cache.hit.translation', file=str(norm))
     # build srt
     from uuid import uuid4
     out = Path(settings.subs_dir)/f"{uuid4().hex}.srt"

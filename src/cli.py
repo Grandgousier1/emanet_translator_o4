@@ -14,7 +14,7 @@ app = typer.Typer(help="Émanet subtitles offline pipeline (CLI étendue)")
 @app.command('offline')
 def offline(url: str = typer.Argument(..., help="URL YouTube de l'épisode"),
            open_vlc: bool = typer.Option(True, help="Ouvrir VLC après génération"),
-           no_cache: bool = typer.Option(False, help="Ignorer le cache et régénérer")):
+           no_cache: bool = typer.Option(False, help="Ignorer le cache (lecture/écriture)")):
     start=time.time()
     with Progress(SpinnerColumn(), *Progress.get_default_columns(), TimeElapsedColumn()) as progress:
         task = progress.add_task("Pipeline", total=None)

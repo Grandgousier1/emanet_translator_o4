@@ -21,7 +21,6 @@ def get_translator():
         # Prefer 8-bit quantization if bitsandbytes is available
         try:
             import bitsandbytes  # noqa: F401
-
             quant_args["load_in_8bit"] = True
         except Exception:
             if torch is not None:
