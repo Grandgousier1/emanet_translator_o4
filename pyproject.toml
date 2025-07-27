@@ -10,7 +10,7 @@ readme = "README.md"
 python = "^3.11"
 yt-dlp = "^2024.7.1"
 ffmpeg-python = "^0.2.0"
-pydantic = "^1.10"
+pydantic = "<2"
 structlog = "^22.3"
 pydub = "^0.25.1"
 typer = {version="^0.9", extras=["all"]}
@@ -49,16 +49,16 @@ strict = false
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
----
+# ---
 
 # Dockerfile
-FROM python:3.11-slim AS base
-WORKDIR /app
-ENV PIP_NO_CACHE_DIR=1
-RUN apt-get update && apt-get install -y ffmpeg git build-essential && rm -rf /var/lib/apt/lists/*
-COPY pyproject.toml .
-RUN pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
-COPY . .
-RUN mkdir -p downloads subs cache audio
-CMD ["emanet-subtitles","offline","--url","https://example.com"]
+# FROM python:3.11-slim AS base
+# WORKDIR /app
+# ENV PIP_NO_CACHE_DIR=1
+# RUN apt-get update && apt-get install -y ffmpeg git build-essential && rm -rf /var/lib/apt/lists/*
+# COPY pyproject.toml .
+# RUN pip install poetry && poetry config virtualenvs.create false && poetry install --no-dev
+# COPY . .
+# RUN mkdir -p downloads subs cache audio
+# CMD ["emanet-subtitles","offline","--url","https://example.com"]
 
