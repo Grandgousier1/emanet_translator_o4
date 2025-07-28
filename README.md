@@ -31,7 +31,7 @@ VLC s’ouvrira automatiquement (si installé) avec les sous-titres générés d
 
 ## GUI
 ```bash
-python src/gui.py
+python -m src.gui
 ```
 Entrer l’URL, lancer.
 
