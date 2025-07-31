@@ -16,6 +16,7 @@ from .offline.cache import (
 )
 from .logger import logger
 
+
 app = typer.Typer(help="Émanet subtitles offline pipeline (CLI étendue)")
 
 
