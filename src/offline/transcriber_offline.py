@@ -1,4 +1,5 @@
 from faster_whisper import WhisperModel
+import ctranslate2
 from pathlib import Path
 from ..config import settings
 from ..logger import logger
@@ -11,8 +12,18 @@ def get_model():
         logger.info('whisper.load', size=settings.whisper_model_size, device=settings.whisper_device)
         _model_singleton = WhisperModel(
             settings.whisper_model_size,
-            device=settings.whisper_device if settings.whisper_device!='auto' else 'cuda' if WhisperModel.is_cuda_available() else 'cpu',
-            compute_type=settings.whisper_compute_type if settings.whisper_compute_type!='auto' else 'int8_float16'
+            device=(
+                settings.whisper_device
+                if settings.whisper_device != 'auto'
+                else 'cuda'
+                if ctranslate2.get_cuda_device_count() > 0
+                else 'cpu'
+            ),
+            compute_type=(
+                settings.whisper_compute_type
+                if settings.whisper_compute_type != 'auto'
+                else 'int8_float16'
+            ),
         )
     return _model_singleton
 

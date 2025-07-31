@@ -5,6 +5,7 @@ def import_pipeline(monkeypatch):
     import sys, types
     sys.modules.setdefault('yt_dlp', types.SimpleNamespace(YoutubeDL=lambda *a, **k: None))
     sys.modules.setdefault('faster_whisper', types.SimpleNamespace(WhisperModel=object))
+    sys.modules.setdefault('ctranslate2', types.SimpleNamespace(get_cuda_device_count=lambda: 0))
     sys.modules.setdefault('transformers', types.SimpleNamespace(AutoTokenizer=object, AutoModelForSeq2SeqLM=object))
     structlog_mod = types.ModuleType('structlog')
     structlog_mod.configure = lambda **kw: None
