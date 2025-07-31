@@ -4,7 +4,8 @@ from ..logger import logger
 from ..config import settings
 
 def normalize(audio_path: Path) -> Path:
-    norm_dir = Path(settings.audio_dir); norm_dir.mkdir(parents=True, exist_ok=True)
+    norm_dir = Path(settings.audio_dir)
+    norm_dir.mkdir(parents=True, exist_ok=True)
     out = norm_dir / (audio_path.stem + '_norm.wav')
     logger.info('normalize.start', src=str(audio_path))
     cmd = [

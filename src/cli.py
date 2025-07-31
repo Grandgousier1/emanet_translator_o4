@@ -29,7 +29,8 @@ def offline(url: str = typer.Argument(..., help="URL YouTube de l'épisode"),
 
 @app.command('prewarm')
 def prewarm():
-    get_model(); get_translator()
+    get_model()
+    get_translator()
     typer.echo("Modèles chargés en mémoire.")
 
 @app.command('inspect-cache')
@@ -55,7 +56,7 @@ def batch(urls_file: Path = typer.Argument(..., help="Fichier texte: 1 URL par l
         try:
             return u, str(run_offline(u))
         except Exception as e:
-            return u, f"ERREUR: {e}";
+            return u, f"ERREUR: {e}"
     results=[]
     if parallel>1:
         with concurrent.futures.ProcessPoolExecutor(max_workers=parallel) as ex:
@@ -64,7 +65,9 @@ def batch(urls_file: Path = typer.Argument(..., help="Fichier texte: 1 URL par l
                 typer.echo(f"→ {r[0]} => {r[1]}")
     else:
         for u in urls:
-            r=worker(u); results.append(r); typer.echo(f"→ {r[0]} => {r[1]}")
+            r = worker(u)
+            results.append(r)
+            typer.echo(f"→ {r[0]} => {r[1]}")
     if open_vlc:
         for _, srt in results:
             if srt.endswith('.srt'):
