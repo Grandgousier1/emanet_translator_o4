@@ -14,7 +14,7 @@ cd emanet-subtitles
 python3.11 -m venv .venv && source .venv/bin/activate
 pip install --upgrade pip
 pip install poetry
-poetry install --no-dev
+poetry install --without dev
 ```
 
 ## Configuration (optionnelle)
