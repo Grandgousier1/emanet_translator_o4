@@ -2,7 +2,7 @@ import threading
 import subprocess
 import time
 import tkinter as tk
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, ttk
 from pathlib import Path
 
 from .offline.pipeline_offline import run_offline
@@ -31,12 +31,21 @@ class App:
         tk.Button(root, text="Prewarm Models", command=self.prewarm).grid(
             row=1, column=0, sticky="e"
         )
+        self.progress = ttk.Progressbar(root, length=300, mode="determinate")
+        self.progress.grid(row=2, column=0, columnspan=3, sticky="we")
         self.log = tk.Text(root, height=18, width=100)
-        self.log.grid(row=2, column=0, columnspan=3)
+        self.log.grid(row=3, column=0, columnspan=3)
 
     def append(self, text: str) -> None:
         self.log.insert(tk.END, text + "\n")
         self.log.see(tk.END)
+
+    def set_progress(self, current: int, total: int) -> None:
+        def update():
+            self.progress["maximum"] = total
+            self.progress["value"] = current
+
+        self.progress.after(0, update)
 
     def prewarm(self) -> None:
         self.append("Chargement des modèles...")
@@ -75,6 +84,7 @@ class App:
         if not url:
             messagebox.showerror("Erreur", "URL requise")
             return
+        self.progress["value"] = 0
         threading.Thread(target=self._do_run, args=(url,), daemon=True).start()
 
     def _do_run(self, url: str) -> None:
@@ -88,10 +98,11 @@ class App:
                 except Exception as e:  # pragma: no cover
                     self.append(f"Erreur démarrage debug: {e}")
             self.append("Téléchargement / Transcription / Traduction...")
-            srt = run_offline(url)
-            self.append(
-                f"OK: {srt} en {time.time() - t0:.1f}s. Ouverture VLC..."
-            )
+            try:
+                srt = run_offline(url, progress=self.set_progress)
+            except TypeError:
+                srt = run_offline(url)
+            self.append(f"OK: {srt} en {time.time() - t0:.1f}s. Ouverture VLC...")
             try:
                 subprocess.Popen(["vlc", "--sub-file", str(srt)])
             except FileNotFoundError:
