@@ -3,6 +3,7 @@ from pathlib import Path
 from ..logger import logger
 from ..config import settings
 
+
 def download_audio(url: str) -> Path:
     Path(settings.download_dir).mkdir(parents=True, exist_ok=True)
     ydl_opts = {
@@ -19,4 +20,3 @@ def download_audio(url: str) -> Path:
         audio_path = Path(ydl.prepare_filename(info)).with_suffix('.wav')
     logger.info('download.done', path=str(audio_path))
     return audio_path
-

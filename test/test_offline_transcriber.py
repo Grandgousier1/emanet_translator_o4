@@ -1,4 +1,5 @@
-import sys, types
+import sys
+import types
 from pathlib import Path
 
 # Stub external modules before importing the module under test
@@ -23,7 +24,7 @@ logger_mod.logger = types.SimpleNamespace(info=lambda *a, **k: None)
 sys.modules["src.config"] = config_mod
 sys.modules["src.logger"] = logger_mod
 
-import src.offline.transcriber_offline as transcriber
+import src.offline.transcriber_offline as transcriber  # noqa: E402
 
 
 class DummyModel:

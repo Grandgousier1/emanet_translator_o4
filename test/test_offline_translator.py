@@ -1,4 +1,5 @@
-import sys, types
+import sys
+import types
 
 trans_mod = types.ModuleType("transformers")
 trans_mod.AutoTokenizer = object
@@ -14,7 +15,7 @@ logger_mod.logger = types.SimpleNamespace(info=lambda *a, **k: None)
 sys.modules["src.config"] = config_mod
 sys.modules["src.logger"] = logger_mod
 
-from src.offline.translator_offline import translate_segments
+from src.offline.translator_offline import translate_segments  # noqa: E402
 
 
 def test_translate_empty():
