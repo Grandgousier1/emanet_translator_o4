@@ -16,6 +16,8 @@ pip install --upgrade pip
 pip install poetry
 poetry install --no-dev
 ```
+Note: Ce projet cible **Python 3.11**. Utiliser Python 3.12 peut nécessiter des
+paquets système comme `cmake` pour compiler `sentencepiece`.
 
 ## Configuration (optionnelle)
 ```bash
