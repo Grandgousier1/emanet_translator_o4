@@ -52,4 +52,3 @@ def run_offline(url: str, *, force: bool = False) -> Path:
     out = Path(settings.subs_dir)/f"{uuid4().hex}.srt"
     build_srt(translated, out)
     return out
-

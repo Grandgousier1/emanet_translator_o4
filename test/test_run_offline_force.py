@@ -1,16 +1,35 @@
-import pytest
-
-
 def import_pipeline(monkeypatch):
-    import sys, types
-    sys.modules.setdefault('yt_dlp', types.SimpleNamespace(YoutubeDL=lambda *a, **k: None))
-    sys.modules.setdefault('faster_whisper', types.SimpleNamespace(WhisperModel=object))
-    sys.modules.setdefault('ctranslate2', types.SimpleNamespace(get_cuda_device_count=lambda: 0))
-    sys.modules.setdefault('transformers', types.SimpleNamespace(AutoTokenizer=object, AutoModelForSeq2SeqLM=object))
+    import sys
+    import types
+
+    sys.modules.setdefault(
+        'yt_dlp', types.SimpleNamespace(YoutubeDL=lambda *a, **k: None)
+    )
+    sys.modules.setdefault(
+        'faster_whisper', types.SimpleNamespace(WhisperModel=object)
+    )
+    sys.modules.setdefault(
+        'ctranslate2', types.SimpleNamespace(get_cuda_device_count=lambda: 0)
+    )
+    sys.modules.setdefault(
+        'transformers',
+        types.SimpleNamespace(
+            AutoTokenizer=object,
+            AutoModelForSeq2SeqLM=object,
+        ),
+    )
     structlog_mod = types.ModuleType('structlog')
     structlog_mod.configure = lambda **kw: None
-    structlog_mod.processors = types.SimpleNamespace(TimeStamper=lambda fmt=None: None, add_log_level=lambda *a, **k: None, JSONRenderer=lambda *a, **k: None)
-    structlog_mod.get_logger = lambda: types.SimpleNamespace(info=lambda *a, **k: None, warning=lambda *a, **k: None, error=lambda *a, **k: None)
+    structlog_mod.processors = types.SimpleNamespace(
+        TimeStamper=lambda fmt=None: None,
+        add_log_level=lambda *a, **k: None,
+        JSONRenderer=lambda *a, **k: None,
+    )
+    structlog_mod.get_logger = lambda: types.SimpleNamespace(
+        info=lambda *a, **k: None,
+        warning=lambda *a, **k: None,
+        error=lambda *a, **k: None,
+    )
     stdlib_mod = types.ModuleType('structlog.stdlib')
     stdlib_mod.LoggerFactory = object
     sys.modules.setdefault('structlog', structlog_mod)
@@ -18,6 +37,7 @@ def import_pipeline(monkeypatch):
     config_mod = types.ModuleType('src.config')
     config_mod.settings = types.SimpleNamespace(subs_dir='subs')
     sys.modules.setdefault('src.config', config_mod)
+
     from src.offline import pipeline_offline as pl
     return pl
 
@@ -30,15 +50,31 @@ def test_run_offline_force(monkeypatch, tmp_path):
     # stub heavy operations
     monkeypatch.setattr(pl, "download_audio", lambda url: tmp_path / "dl.wav")
     monkeypatch.setattr(pl, "normalize", lambda p: p)
-    monkeypatch.setattr(pl, "transcribe", lambda p: [{"start": 0.0, "end": 1.0, "text": "hi"}])
     monkeypatch.setattr(
-        pl, "translate_segments", lambda segs: [{"start": 0.0, "end": 1.0, "text": "hi", "text_fr": "bonjour"}]
+        pl,
+        "transcribe",
+        lambda p: [{"start": 0.0, "end": 1.0, "text": "hi"}],
     )
-    monkeypatch.setattr(pl, "build_srt", lambda segs, out: out.write_text("ok") or out)
+    monkeypatch.setattr(
+        pl,
+        "translate_segments",
+        lambda segs: [
+            {"start": 0.0, "end": 1.0, "text": "hi", "text_fr": "bonjour"}
+        ],
+    )
+    monkeypatch.setattr(
+        pl,
+        "build_srt",
+        lambda segs, out: out.write_text("ok") or out,
+    )
 
     # stub cache helpers and record usage
-    monkeypatch.setattr(pl, "transcription_cache_path", lambda p: tmp_path / "t.json")
-    monkeypatch.setattr(pl, "translation_cache_path", lambda p: tmp_path / "tr.json")
+    monkeypatch.setattr(
+        pl, "transcription_cache_path", lambda p: tmp_path / "t.json"
+    )
+    monkeypatch.setattr(
+        pl, "translation_cache_path", lambda p: tmp_path / "tr.json"
+    )
     load_called = []
     save_called = []
 

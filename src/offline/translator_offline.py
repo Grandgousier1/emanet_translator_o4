@@ -53,7 +53,10 @@ def translate_segments(segments):
         batch.clear()
 
     for seg in segments:
-        if sum(len(s["text"]) for s in batch) + len(seg["text"]) > max_batch_chars:
+        if (
+            sum(len(s["text"]) for s in batch) + len(seg["text"])
+            > max_batch_chars
+        ):
             flush()
         batch.append(seg)
     flush()

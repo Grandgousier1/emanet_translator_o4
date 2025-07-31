@@ -1,7 +1,10 @@
-import structlog, logging
+import logging
+
+import structlog
 from structlog.stdlib import LoggerFactory
 
-def configure_logging():
+
+def configure_logging() -> None:
     logging.basicConfig(format='%(message)s', level=logging.INFO)
     structlog.configure(
         logger_factory=LoggerFactory(),
@@ -12,7 +15,7 @@ def configure_logging():
         ]
     )
 
+
 logger = structlog.get_logger()
 
 configure_logging()
-

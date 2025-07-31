@@ -16,7 +16,11 @@ class App:
         tk.Label(root, text="Episode URL:").grid(row=0, column=0, sticky="e")
         self.url_entry = tk.Entry(root, width=70)
         self.url_entry.grid(row=0, column=1, columnspan=2)
-        tk.Button(root, text="Run", command=self.run_pipeline).grid(row=1, column=1, sticky="w")
+        tk.Button(
+            root,
+            text="Run",
+            command=self.run_pipeline,
+        ).grid(row=1, column=1, sticky="w")
         tk.Button(root, text="Batch File", command=self.batch_select).grid(
             row=1, column=2, sticky="w"
         )
@@ -44,7 +48,11 @@ class App:
         path = filedialog.askopenfilename(title="Fichier URLs (1 par ligne)")
         if not path:
             return
-        threading.Thread(target=self.run_batch, args=(Path(path),), daemon=True).start()
+        threading.Thread(
+            target=self.run_batch,
+            args=(Path(path),),
+            daemon=True,
+        ).start()
 
     def run_batch(self, file: Path) -> None:
         urls = [u.strip() for u in file.read_text().splitlines() if u.strip()]
@@ -70,7 +78,9 @@ class App:
         try:
             self.append("Téléchargement / Transcription / Traduction...")
             srt = run_offline(url)
-            self.append(f"OK: {srt} en {time.time() - t0:.1f}s. Ouverture VLC...")
+            self.append(
+                f"OK: {srt} en {time.time() - t0:.1f}s. Ouverture VLC..."
+            )
             try:
                 subprocess.Popen(["vlc", "--sub-file", str(srt)])
             except FileNotFoundError:

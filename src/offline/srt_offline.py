@@ -34,5 +34,9 @@ def build_srt(translated_segments, out_path: Path) -> Path:
             f.write(
                 f"{i}\n{_fmt(seg['start'])} --> {_fmt(seg['end'])}\n{txt}\n\n"
             )
-    logger.info("srt.write", path=str(out_path), count=len(translated_segments))
+    logger.info(
+        "srt.write",
+        path=str(out_path),
+        count=len(translated_segments),
+    )
     return out_path
