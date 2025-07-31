@@ -6,6 +6,10 @@ fw_mod = types.ModuleType("faster_whisper")
 fw_mod.WhisperModel = object
 sys.modules.setdefault("faster_whisper", fw_mod)
 
+ct_mod = types.ModuleType("ctranslate2")
+ct_mod.get_cuda_device_count = lambda: 0
+sys.modules.setdefault("ctranslate2", ct_mod)
+
 config_mod = types.ModuleType("src.config")
 config_mod.settings = types.SimpleNamespace(
     merge_gap_seconds=0.5,
