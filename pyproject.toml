@@ -5,6 +5,7 @@ license = "MIT"
 description = "Pipeline 100% offline: Whisper (turc) -> FR NLLB, batch, bench, debug avancé."
 authors = ["Votre Nom <vous@example.com>"]
 readme = "README.md"
+packages = [{ include = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"
