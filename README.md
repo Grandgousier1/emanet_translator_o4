@@ -50,7 +50,7 @@ Supprimer ces fichiers pour forcer une régénération.
 
 ## Optimisation
 - GPU : si CUDA dispo, mettre `WHISPER_DEVICE=cuda` et `WHISPER_COMPUTE_TYPE=float16`.
-- CPU : garder `auto` + quantization par défaut (`int8_float16`).
+ - CPU : garder `WHISPER_COMPUTE_TYPE=auto` pour utiliser la quantification `int8`.
 
 ## Tests
 ```bash
