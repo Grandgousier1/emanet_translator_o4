@@ -16,6 +16,10 @@ class App:
         tk.Label(root, text="Episode URL:").grid(row=0, column=0, sticky="e")
         self.url_entry = tk.Entry(root, width=70)
         self.url_entry.grid(row=0, column=1, columnspan=2)
+        self.debug_var = tk.BooleanVar(value=False)
+        tk.Checkbutton(root, text="Debug", variable=self.debug_var).grid(
+            row=0, column=3, sticky="w"
+        )
         tk.Button(
             root,
             text="Run",
@@ -76,6 +80,13 @@ class App:
     def _do_run(self, url: str) -> None:
         t0 = time.time()
         try:
+            if self.debug_var.get():
+                from . import debug as debug_module
+
+                try:
+                    debug_module.start()
+                except Exception as e:  # pragma: no cover
+                    self.append(f"Erreur démarrage debug: {e}")
             self.append("Téléchargement / Transcription / Traduction...")
             srt = run_offline(url)
             self.append(
@@ -87,6 +98,7 @@ class App:
                 self.append("VLC non trouvé.")
         except Exception as e:  # pragma: no cover - runtime errors
             self.append(f"ERREUR: {e}")
+            messagebox.showerror("Erreur", str(e))
 
 
 if __name__ == "__main__":

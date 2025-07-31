@@ -28,6 +28,8 @@ cp .env.example .env
 ## Utilisation CLI
 ```bash
 emanet-subtitles offline --url https://www.youtube.com/watch?v=VIDEO_ID
+# Pour activer un serveur debugpy:
+emanet-subtitles offline --url https://youtu.be/ID --debug
 ```
 VLC s’ouvrira automatiquement (si installé) avec les sous-titres générés dans `subs/`.
 
@@ -35,7 +37,7 @@ VLC s’ouvrira automatiquement (si installé) avec les sous-titres générés d
 ```bash
 python -m src.gui
 ```
-Entrer l’URL, lancer.
+Entrer l’URL, lancer. Pour activer le débogage distant, cochez "Debug" avant d'exécuter.
 
 ## Caching
 - Transcription : `cache/transcription/<hash>.json`
