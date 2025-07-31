@@ -24,9 +24,7 @@ app = typer.Typer(help="Émanet subtitles offline pipeline (CLI étendue)")
 def offline(
     url: str = typer.Argument(..., help="URL YouTube de l'épisode"),
     open_vlc: bool = typer.Option(True, help="Ouvrir VLC après génération"),
-    no_cache: bool = typer.Option(
-        False, help="Ignorer le cache (lecture/écriture)"
-    ),
+    no_cache: bool = typer.Option(False, help="Ignorer le cache (lecture/écriture)"),
     debug: bool = typer.Option(False, help="Activer le serveur debugpy"),
 ) -> None:
     if debug:
@@ -42,9 +40,16 @@ def offline(
         *Progress.get_default_columns(),
         TimeElapsedColumn(),
     ) as progress:
-        task = progress.add_task("Pipeline", total=None)
+        task = progress.add_task("Pipeline", total=5)
+
+        def cb(current: int, total: int) -> None:
+            progress.update(task, completed=current)
+
         try:
-            srt = run_offline(url, force=no_cache)
+            try:
+                srt = run_offline(url, force=no_cache, progress=cb)
+            except TypeError:
+                srt = run_offline(url, force=no_cache)
             progress.update(task, description="Terminé")
         except Exception as e:
             progress.update(task, description="ERREUR")
@@ -76,23 +81,19 @@ def inspect_cache(audio_file: Path) -> None:
     t = transcription_cache_path(audio_file)
     tr = translation_cache_path(audio_file)
     data = {
-        'transcription_cache_exists': t.exists(),
-        'translation_cache_exists': tr.exists(),
-        'transcription_segments': len(load_json(t) or []),
-        'translation_segments': len(load_json(tr) or [])
+        "transcription_cache_exists": t.exists(),
+        "translation_cache_exists": tr.exists(),
+        "transcription_segments": len(load_json(t) or []),
+        "translation_segments": len(load_json(tr) or []),
     }
     typer.echo(json.dumps(data, indent=2, ensure_ascii=False))
 
 
 @app.command("batch")
 def batch(
-    urls_file: Path = typer.Argument(
-        ..., help="Fichier texte: 1 URL par ligne"
-    ),
+    urls_file: Path = typer.Argument(..., help="Fichier texte: 1 URL par ligne"),
     parallel: int = typer.Option(1, help="Nb de processus"),
-    open_vlc: bool = typer.Option(
-        False, help="Ouvrir VLC après chaque génération"
-    ),
+    open_vlc: bool = typer.Option(False, help="Ouvrir VLC après chaque génération"),
 ) -> None:
     import concurrent.futures
 
@@ -107,9 +108,7 @@ def batch(
 
     results = []
     if parallel > 1:
-        with concurrent.futures.ProcessPoolExecutor(
-            max_workers=parallel
-        ) as ex:
+        with concurrent.futures.ProcessPoolExecutor(max_workers=parallel) as ex:
             for r in ex.map(worker, urls):
                 results.append(r)
                 typer.echo(f"→ {r[0]} => {r[1]}")
@@ -145,10 +144,7 @@ def bench(
         typer.echo(f"Run {i + 1}/{loops}: {dt:.2f}s")
         times.append(dt)
     avg = sum(times) / len(times)
-    typer.echo(
-        f"Moyenne: {avg:.2f}s | "
-        f"Min: {min(times):.2f}s | Max: {max(times):.2f}s"
-    )
+    typer.echo(f"Moyenne: {avg:.2f}s | " f"Min: {min(times):.2f}s | Max: {max(times):.2f}s")
 
 
 if __name__ == "__main__":
