@@ -12,10 +12,11 @@ def normalize(audio_path: Path) -> Path:
         '-ar', '16000', '-ac', '1', '-af', 'loudnorm',
         str(out)
     ]
-    res = subprocess.run(cmd, capture_output=True)
-    if res.returncode != 0:
-        logger.error('normalize.error', stderr=res.stderr.decode())
-        raise RuntimeError('Normalization failed')
+    try:
+        subprocess.run(cmd, capture_output=True, check=True)
+    except subprocess.CalledProcessError as exc:
+        logger.error('normalize.error', stderr=exc.stderr.decode())
+        raise
     logger.info('normalize.done', out=str(out))
     return out
 
