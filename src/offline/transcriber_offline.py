@@ -27,7 +27,7 @@ def get_model():
             compute_type=(
                 settings.whisper_compute_type
                 if settings.whisper_compute_type != 'auto'
-                else 'int8_float16'
+                else 'int8'
             ),
         )
     return _model_singleton
