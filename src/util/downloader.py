@@ -1,4 +1,4 @@
-import yt_dlp, os, hashlib
+import yt_dlp
 from pathlib import Path
 from ..logger import logger
 from ..config import settings

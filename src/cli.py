@@ -1,6 +1,5 @@
 import typer, subprocess, sys, json, time
 from pathlib import Path
-from typing import List
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 from .offline.pipeline_offline import run_offline
 from .offline.transcriber_offline import get_model
