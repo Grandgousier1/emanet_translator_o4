@@ -27,7 +27,15 @@ def offline(
     no_cache: bool = typer.Option(
         False, help="Ignorer le cache (lecture/écriture)"
     ),
+    debug: bool = typer.Option(False, help="Activer le serveur debugpy"),
 ) -> None:
+    if debug:
+        from . import debug as debug_module
+
+        try:
+            debug_module.start()
+        except Exception as e:  # pragma: no cover - debug startup errors
+            typer.secho(f"Erreur démarrage debug: {e}", fg="red")
     start = time.time()
     with Progress(
         SpinnerColumn(),
@@ -35,8 +43,14 @@ def offline(
         TimeElapsedColumn(),
     ) as progress:
         task = progress.add_task("Pipeline", total=None)
-        srt = run_offline(url, force=no_cache)
-        progress.update(task, description="Terminé")
+        try:
+            srt = run_offline(url, force=no_cache)
+            progress.update(task, description="Terminé")
+        except Exception as e:
+            progress.update(task, description="ERREUR")
+            typer.secho(f"Erreur: {e}", fg="red")
+            logger.error("pipeline.error", error=str(e))
+            raise typer.Exit(1)
     typer.echo(f"Sous-titres générés: {srt} (en {time.time() - start:.1f}s)")
     if open_vlc:
         try:
