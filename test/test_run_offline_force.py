@@ -53,12 +53,12 @@ def test_run_offline_force(monkeypatch, tmp_path):
     monkeypatch.setattr(
         pl,
         "transcribe",
-        lambda p: [{"start": 0.0, "end": 1.0, "text": "hi"}],
+        lambda p, progress=None: [{"start": 0.0, "end": 1.0, "text": "hi"}],
     )
     monkeypatch.setattr(
         pl,
         "translate_segments",
-        lambda segs: [
+        lambda segs, progress=None: [
             {"start": 0.0, "end": 1.0, "text": "hi", "text_fr": "bonjour"}
         ],
     )

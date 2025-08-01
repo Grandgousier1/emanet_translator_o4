@@ -61,11 +61,11 @@ def test_run_offline_cache(monkeypatch, tmp_path):
     ]
     t_calls = {'trans': 0, 'translate': 0}
 
-    def fake_transcribe(p):
+    def fake_transcribe(p, progress=None):
         t_calls['trans'] += 1
         return list(transcribed)
 
-    def fake_translate(segs):
+    def fake_translate(segs, progress=None):
         t_calls['translate'] += 1
         return list(translated)
 

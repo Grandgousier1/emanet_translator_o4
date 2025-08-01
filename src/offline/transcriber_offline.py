@@ -1,6 +1,8 @@
 from faster_whisper import WhisperModel
 import ctranslate2
 from pathlib import Path
+from typing import Callable, Optional
+
 from ..config import settings
 from ..logger import logger
 
@@ -33,7 +35,10 @@ def get_model():
     return _model_singleton
 
 
-def transcribe(audio_path: Path):
+def transcribe(
+    audio_path: Path,
+    progress: Optional[Callable[[float, float], None]] = None,
+) -> list:
     model = get_model()
     logger.info('transcribe.start', file=str(audio_path))
     segments, info = model.transcribe(
@@ -41,6 +46,13 @@ def transcribe(audio_path: Path):
         beam_size=5,
         vad_filter=True,
     )
+    duration = 0.0
+    if isinstance(info, dict):
+        duration = float(info.get("duration", 0))
+    else:  # pragma: no cover - real object with attribute
+        duration = float(getattr(info, "duration", 0))
+    if progress and duration:
+        progress(0, duration)
     collected = []
     for seg in segments:
         seg_text = seg.text.strip()
@@ -59,5 +71,9 @@ def transcribe(audio_path: Path):
                 'end': float(seg.end),
                 'text': seg_text
             })
+        if progress and duration:
+            progress(min(seg.end, duration), duration)
     logger.info('transcribe.done', segments=len(collected))
+    if progress and duration:
+        progress(duration, duration)
     return collected

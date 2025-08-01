@@ -5,6 +5,8 @@ try:
 except Exception:  # pragma: no cover - optional dependency
     torch = None  # type: ignore
 
+from typing import Callable, Optional
+
 from ..config import settings
 from ..logger import logger
 
@@ -33,15 +35,23 @@ def get_translator():
     return _tok, _model
 
 
-def translate_segments(segments):
+def translate_segments(
+    segments,
+    progress: Optional[Callable[[int, int], None]] = None,
+) -> list:
     if not segments:
         return []
     tok, mdl = get_translator()
     out = []
     batch = []
     max_batch_chars = 1200
+    processed = 0
+    total = len(segments)
+    if progress:
+        progress(0, total)
 
     def flush():
+        nonlocal processed
         if not batch:
             return
         texts = [s["text"] for s in batch]
@@ -50,6 +60,9 @@ def translate_segments(segments):
         decoded = tok.batch_decode(gen, skip_special_tokens=True)
         for src, tgt in zip(batch, decoded):
             out.append({**src, "text_fr": tgt})
+        processed += len(batch)
+        if progress:
+            progress(processed, total)
         batch.clear()
 
     for seg in segments:
@@ -60,4 +73,6 @@ def translate_segments(segments):
             flush()
         batch.append(seg)
     flush()
+    if progress:
+        progress(total, total)
     return out
