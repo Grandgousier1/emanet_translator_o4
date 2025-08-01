@@ -1,8 +1,8 @@
 # Émanet Subtitles – Version 100% Offline
 
 Cette version supprime toute dépendance aux APIs distantes :
-- **Transcription** locale via *faster-whisper* (modèle Whisper).
-- **Traduction** locale via *NLLB 200 distilled* (Turc → Français).
+- **Transcription** locale via *mistralai/Voxtral-Small-24B-2507*.
+- **Traduction** locale via *mistralai/mistral-medium-2505* (Turc → Français).
 - **Téléchargement** YouTube avec *yt-dlp*.
 - **Génération** directe des SRT à partir des timestamps Whisper (fusion adaptative des segments).
 - **Cache** SHA256 pour éviter de retraiter un même épisode.
@@ -22,7 +22,10 @@ paquets système comme `cmake` pour compiler `sentencepiece`.
 ## Configuration (optionnelle)
 ```bash
 cp .env.example .env
-# ajustez WHISPER_MODEL_SIZE, NLLB_MODEL_SIZE, etc.
+# ajustez VOXTRAL_MODEL et MISTRAL_MODEL si besoin
+# VOXTRAL_DEVICE et MISTRAL_DEVICE acceptent un index GPU:
+#   VOXTRAL_DEVICE=cuda:0
+#   MISTRAL_DEVICE=cuda:1
 ```
 
 ## Utilisation CLI
@@ -45,18 +48,30 @@ Entrer l’URL, lancer. Pour activer le débogage distant, cochez "Debug" avant 
 Supprimer ces fichiers pour forcer une régénération.
 
 ## Choix de modèles
-- Whisper : changer `WHISPER_MODEL_SIZE` (`tiny`, `base`, `small`, `medium`, `large-v3`).
-- Traduction : variable `NLLB_MODEL_SIZE` (`600M` ou `1.3B`).
+- STT : variable `VOXTRAL_MODEL` (par défaut Voxtral Small).
+- LLM  : variable `MISTRAL_MODEL` (par défaut Mistral Medium 2505).
 
 ## Optimisation
-- GPU : si CUDA dispo, mettre `WHISPER_DEVICE=cuda` et `WHISPER_COMPUTE_TYPE=float16`.
- - CPU : garder `WHISPER_COMPUTE_TYPE=auto` pour utiliser la quantification `int8`.
+- GPU : si CUDA dispo, mettre `VOXTRAL_DEVICE=cuda:0` et `MISTRAL_DEVICE=cuda:1` pour exploiter deux cartes.
 
 ## Tests
 ```bash
 poetry run pytest -q
 ```
 (Certains tests sont marqués `skip` car ils nécessitent un vrai média.)
+
+## Déploiement Runpod
+Une image Docker est fournie pour exécuter le pipeline sur Runpod.io :
+
+```bash
+docker build -t emanet-runpod .
+# puis lancer avec les volumes nécessaires
+```
+Sur Runpod, assignez deux GPU et fixez les variables d'environnement :
+```
+VOXTRAL_DEVICE=cuda:0 MISTRAL_DEVICE=cuda:1 docker run emanet-runpod
+```
+Ainsi la transcription et la traduction tournent simultanément sur deux cartes.
 
 ## Licence
 MIT.

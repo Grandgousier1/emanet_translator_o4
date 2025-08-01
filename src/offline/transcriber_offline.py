@@ -1,5 +1,4 @@
-from faster_whisper import WhisperModel
-import ctranslate2
+from transformers import pipeline
 from pathlib import Path
 from ..config import settings
 from ..logger import logger
@@ -11,24 +10,25 @@ def get_model():
     global _model_singleton
     if _model_singleton is None:
         logger.info(
-            'whisper.load',
-            size=settings.whisper_model_size,
-            device=settings.whisper_device,
+            'voxtral.load',
+            model=settings.voxtral_model,
+            device=settings.voxtral_device,
         )
-        _model_singleton = WhisperModel(
-            settings.whisper_model_size,
-            device=(
-                settings.whisper_device
-                if settings.whisper_device != 'auto'
-                else 'cuda'
-                if ctranslate2.get_cuda_device_count() > 0
-                else 'cpu'
-            ),
-            compute_type=(
-                settings.whisper_compute_type
-                if settings.whisper_compute_type != 'auto'
-                else 'int8'
-            ),
+        dev = settings.voxtral_device
+        if dev.startswith("cuda"):
+            try:
+                device = int(dev.split(":")[1])
+            except IndexError:
+                device = 0
+        elif dev == "cpu":
+            device = -1
+        else:
+            device = 0 if dev == "cuda" else -1
+        _model_singleton = pipeline(
+            "automatic-speech-recognition",
+            model=settings.voxtral_model,
+            device=device,
+            return_timestamps=True,
         )
     return _model_singleton
 
@@ -36,28 +36,20 @@ def get_model():
 def transcribe(audio_path: Path):
     model = get_model()
     logger.info('transcribe.start', file=str(audio_path))
-    segments, info = model.transcribe(
-        str(audio_path),
-        beam_size=5,
-        vad_filter=True,
-    )
-    collected = []
-    for seg in segments:
-        seg_text = seg.text.strip()
-        # Merge small gaps when the combined text is not too long
+    result = model(str(audio_path))
+    segments = []
+    for chunk in result.get('chunks', []):
+        seg_text = chunk['text'].strip()
+        start, end = chunk['timestamp']
         if (
-            collected
-            and seg.start - collected[-1]['end'] < settings.merge_gap_seconds
-            and len(collected[-1]['text']) + 1 + len(seg_text)
+            segments
+            and start - segments[-1]['end'] < settings.merge_gap_seconds
+            and len(segments[-1]['text']) + 1 + len(seg_text)
             <= settings.max_segment_chars
         ):
-            collected[-1]['text'] += ' ' + seg_text
-            collected[-1]['end'] = seg.end
+            segments[-1]['text'] += ' ' + seg_text
+            segments[-1]['end'] = end
         else:
-            collected.append({
-                'start': float(seg.start),
-                'end': float(seg.end),
-                'text': seg_text
-            })
-    logger.info('transcribe.done', segments=len(collected))
-    return collected
+            segments.append({'start': float(start), 'end': float(end), 'text': seg_text})
+    logger.info('transcribe.done', segments=len(segments))
+    return segments
