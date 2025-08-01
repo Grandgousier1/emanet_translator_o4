@@ -21,20 +21,11 @@ def test_offline_debug(monkeypatch):
     )
     monkeypatch.setitem(
         sys.modules,
-        "faster_whisper",
-        types.SimpleNamespace(WhisperModel=object),
-    )
-    monkeypatch.setitem(
-        sys.modules,
-        "ctranslate2",
-        types.SimpleNamespace(get_cuda_device_count=lambda: 0),
-    )
-    monkeypatch.setitem(
-        sys.modules,
         "transformers",
         types.SimpleNamespace(
+            pipeline=object,
             AutoTokenizer=object,
-            AutoModelForSeq2SeqLM=object,
+            AutoModelForCausalLM=object,
         ),
     )
     monkeypatch.setitem(sys.modules, "debugpy", types.ModuleType("debugpy"))

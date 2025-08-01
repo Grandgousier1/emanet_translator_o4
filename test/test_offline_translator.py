@@ -3,7 +3,7 @@ import types
 
 trans_mod = types.ModuleType("transformers")
 trans_mod.AutoTokenizer = object
-trans_mod.AutoModelForSeq2SeqLM = object
+trans_mod.AutoModelForCausalLM = object
 sys.modules["transformers"] = trans_mod
 
 config_mod = types.ModuleType("src.config")
