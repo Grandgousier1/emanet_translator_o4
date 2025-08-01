@@ -8,15 +8,10 @@ def test_gui_debug(monkeypatch):
     yt_mod = types.ModuleType("yt_dlp")
     yt_mod.YoutubeDL = lambda *a, **k: None
     monkeypatch.setitem(sys.modules, "yt_dlp", yt_mod)
-    fw_mod = types.ModuleType("faster_whisper")
-    fw_mod.WhisperModel = object
-    monkeypatch.setitem(sys.modules, "faster_whisper", fw_mod)
-    ct_mod = types.ModuleType("ctranslate2")
-    ct_mod.get_cuda_device_count = lambda: 0
-    monkeypatch.setitem(sys.modules, "ctranslate2", ct_mod)
     tr_mod = types.ModuleType("transformers")
+    tr_mod.pipeline = object
     tr_mod.AutoTokenizer = object
-    tr_mod.AutoModelForSeq2SeqLM = object
+    tr_mod.AutoModelForCausalLM = object
     monkeypatch.setitem(sys.modules, "transformers", tr_mod)
     config_mod = types.ModuleType("src.config")
     config_mod.settings = types.SimpleNamespace(

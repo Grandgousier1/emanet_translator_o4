@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 
 try:
     import torch
@@ -15,8 +15,8 @@ _model = None
 def get_translator():
     global _tok, _model
     if _tok is None:
-        logger.info("nllb.load", model=settings.nllb_model)
-        _tok = AutoTokenizer.from_pretrained(settings.nllb_model)
+        logger.info("mistral.load", model=settings.mistral_model)
+        _tok = AutoTokenizer.from_pretrained(settings.mistral_model)
         quant_args = {}
         # Prefer 8-bit quantization if bitsandbytes is available
         try:
@@ -25,8 +25,8 @@ def get_translator():
         except Exception:
             if torch is not None:
                 quant_args["torch_dtype"] = torch.float16
-        _model = AutoModelForSeq2SeqLM.from_pretrained(
-            settings.nllb_model,
+        _model = AutoModelForCausalLM.from_pretrained(
+            settings.mistral_model,
             device_map="auto",
             **quant_args,
         )
@@ -38,26 +38,14 @@ def translate_segments(segments):
         return []
     tok, mdl = get_translator()
     out = []
-    batch = []
-    max_batch_chars = 1200
-
-    def flush():
-        if not batch:
-            return
-        texts = [s["text"] for s in batch]
-        inputs = tok(texts, return_tensors="pt", padding=True, truncation=True)
-        gen = mdl.generate(**inputs, max_length=512)
-        decoded = tok.batch_decode(gen, skip_special_tokens=True)
-        for src, tgt in zip(batch, decoded):
-            out.append({**src, "text_fr": tgt})
-        batch.clear()
-
     for seg in segments:
-        if (
-            sum(len(s["text"]) for s in batch) + len(seg["text"])
-            > max_batch_chars
-        ):
-            flush()
-        batch.append(seg)
-    flush()
+        prompt = (
+            "Traduire le texte suivant du turc vers le français:\n"
+            f"{seg['text']}\n"
+            "Traduction:"
+        )
+        inputs = tok(prompt, return_tensors="pt").to(mdl.device)
+        gen = mdl.generate(**inputs, max_new_tokens=256)
+        text_fr = tok.decode(gen[0], skip_special_tokens=True)
+        out.append({**seg, "text_fr": text_fr.strip()})
     return out

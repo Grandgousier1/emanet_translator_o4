@@ -18,7 +18,6 @@ typer = {version="^0.9", extras=["all"]}
 requests = "^2.32.0"
 python-dotenv = "^1.0.1"
 pysrt = "^1.1.2"
-faster-whisper = "^1.1.1"
 transformers = "^4.41.0"
 sentencepiece = "^0.1.99"
 sacremoses = "^0.1.1"
